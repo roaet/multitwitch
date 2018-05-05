@@ -22,11 +22,15 @@ class WebView:
         streamlister = sl.StreamLister(config)
         community_streams = streamlister.get_community_streams_by_name(
             community_name)
+
+        stream_team = 'x3lelite'
+        stream_team_streams = streamlister.get_team_streams_by_name(steam_team)
         staff_picks = streamlister.get_staff_picks()
         return {'project' : title,
                 'streams' : [],
                 'community_streams': community_streams,
                 'community_name': community_name,
+                'stream_team_streams': stream_team_streams,
                 'staff_picks': staff_picks,
                 'base_url' : base_url,
                 'unique_streams' : [],
@@ -44,10 +48,11 @@ class WebView:
         streamlister = sl.StreamLister(config)
         community_streams = streamlister.get_community_streams_by_name(
             community_name)
+        stream_team = 'x3lelite'
+        stream_team_streams = streamlister.get_team_streams_by_name(steam_team)
         staff_picks = streamlister.get_staff_picks()
 
         path = request.path
-        print path
         if path.startswith('/'): # removes front slash /edit/ -> edit/
             path = path[1:]
         if path.endswith('/'): # removes back flash
@@ -58,11 +63,11 @@ class WebView:
         stream_list = path_parts
         stream_list.pop(0) # removes 'edit'
         edit_string = '/'.join(stream_list)
-        print stream_list
         return {'project' : title,
                 'streams' : stream_list,
                 'community_streams': community_streams,
                 'community_name': community_name,
+                'stream_team_streams': stream_team_streams,
                 'staff_picks': staff_picks,
                 'base_url' : base_url,
                 'unique_streams' : [],
@@ -118,6 +123,7 @@ class WebView:
     @web()
     def twitch_api_test(request):
         config = configparser.ConfigParser()
+        config.read('config.ini')
         default = config['DEFAULT']
         community_name = default.get('community_name', 'x3lgaming')
         title = default.get('title', 'X3LGaming Multitwitch')
@@ -126,7 +132,8 @@ class WebView:
         streamlister = sl.StreamLister(config)
         stream_list = streamlister.get_community_streams_by_name(
             community_name)
-        return str(stream_list)
+        team_list = streamlister.get_team_streams_by_name('x3lelite')
+        return "PASS"
 
     @staticmethod
     def favicon(request):

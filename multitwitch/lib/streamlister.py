@@ -8,6 +8,16 @@ class StreamLister(object):
         self.twitch_api = T.Twitch(conf)
         self.conf = conf
 
+    def _get_list_info_dict_for_team_users(self, json_object):
+        stream_info = {}
+        stream_info['name'] = json_object['name']
+        stream_info['url'] = json_object['url']
+        stream_info['description'] = json_object['status']
+        stream_info['preview'] = json_object['logo']
+        stream_info['game'] = json_object['game']
+        stream_info['id'] = json_object['_id']
+        return stream_info
+
     def _get_list_info_dict(self, json_object):
         stream_info = {}
         stream_info['name'] = json_object['channel']['name']
@@ -20,12 +30,27 @@ class StreamLister(object):
             stream_info['description'] = ""
         stream_info['game'] = json_object['channel']['game']
         stream_info['id'] = json_object['_id']
-        stream_info['preview'] = json_object['preview']['medium']
+        if 'preview' in json_object:
+            stream_info['preview'] = json_object['preview']['medium']
+        elif 'logo' in json_object:
+            stream_info['preview'] = json_object['logo']
         return stream_info
+
+    def get_team_streams_by_name(self, name):
+        team_json = self.twitch_api.get_team_info_by_name(name)
+        team_id = team_json.get('_id', None)
+        if team_id is None:
+            return []
+        list_info = [] 
+        for stream in team_json['users']:
+            list_info.append(self._get_list_info_dict_for_team_users(stream))
+        return list_info
 
     def get_community_streams_by_name(self, name):
         community_json = self.twitch_api.get_community_info_by_name(name)
-        community_id = community_json['_id']
+        community_id = community_json.get('_id', None)
+        if community_id is None:
+            return []
         streams_json = self.twitch_api.get_streams_by_community_id(
             community_id)
         list_info = [] 
