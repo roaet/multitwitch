@@ -1,4 +1,5 @@
 import configparser
+import json
 import requests
 
 
@@ -21,15 +22,17 @@ class Twitch(object):
         }
         return headers
 
-    def _make_request(self, endpoint, payload):
+    def _make_request(self, endpoint, payload=None, limit=25):
+        if payload and limit:
+            payload['limit'] = limit
         r = requests.get(
             self._build_endpoint(endpoint),
             params=payload, headers=self._basic_headers()
         )
         return r
 
-    def _make_json_request(self, endpoint, payload):
-        r = self._make_request(endpoint, payload)
+    def _make_json_request(self, endpoint, payload=None, limit=25):
+        r = self._make_request(endpoint, payload, limit)
         return r.json()
 
     def get_community_info_by_name(self, name):
@@ -37,9 +40,14 @@ class Twitch(object):
         community_json = self._make_json_request('communities', payload)
         return community_json
 
+    def get_team_info_by_name(self, name):
+        target = 'teams/%s' % name
+        team_json = self._make_json_request(target)
+        return team_json
+
     def get_streams_by_community_id(self, id):
         payload = {'community_id': id}
-        streams_json = self._make_json_request('streams', payload)
+        streams_json = self._make_json_request('streams', payload, limit=100)
         return streams_json
 
     def followed_channels_for_clientid(self, clientid=None, oauth=None):
