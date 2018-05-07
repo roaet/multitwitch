@@ -31,13 +31,18 @@
 							<button data-filter-value="*">All</button>
 						</div>-->
 						<!--<div id='sort-filters' class='filter-group floatright'>
+							<button data-sort-value="viewers">Viewers</button>
 							<button data-sort-value="name">Alphabetical</button>
 							<button data-sort-value="live">Live</button>
 							<button data-sort-value="random">Shuffle</button>
 						</div>-->
 						<div id='tag-filters' class='filter-group'>
+                            {% for twitch_name, cominfo in communities.items() %}
+							<button data-filter-value=".tag-{{ 'default' if cominfo.default else twitch_name }}">
+                                {{ cominfo.web_name }} ({{ cominfo.streams|length }})
+                            </button>
+                            {% endfor %}
                             <!-- filters -->
-							<button data-filter-value=".tag-community">X3L Community</button>
 							<!--<button data-filter-value=".tag-team">X3L Elite</button> -->
 							<!-- <button data-filter-value=".tag-patrons">Patrons</button> -->
 							<!-- <button data-filter-value="*">All</button> -->
@@ -47,15 +52,23 @@
 					<div class='grid-sizer'></div>
 					
                         <!-- community/patrons picks -->
-                        {% for comstream in community_streams %}
-						<div class="channel tag-community" rel="{{comstream['name']}}">
-							<div class=channelimage style="background-image: url('{{comstream['preview']}}');">
-								<div class="channelcaption">
-									<div class="channelname">{{comstream['name']}}</div>
-									
-								</div>
-							</div>
-						</div>
+                        {% for twitch_name, cominfo in communities.items() %}
+                            {% for comstream in cominfo.streams %}
+                            <div class="channel tag-{{ 'default' if cominfo.default else twitch_name }}" rel="{{comstream['name']}}">
+                                <div class=channelimage style="background-image: url('{{comstream['preview']}}');">
+                                    <div class="channelcaption">
+                                        <div class="channelname">{{comstream['name']}}</div>
+                                        
+                                    </div>
+                                    <div class="channelcount">
+                                        <div class="viewers">
+                                            {{comstream['viewers']}}
+                                            <img class="viewericon" src="/static/images/viewer_12.png"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
                         {% endfor %}
                         {% for teamstream in stream_team_streams %}
 						<div class="channel tag-team" rel="{{teamstream['name']}}">

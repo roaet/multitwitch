@@ -34,6 +34,10 @@ class StreamLister(object):
             stream_info['preview'] = json_object['preview']['medium']
         elif 'logo' in json_object:
             stream_info['preview'] = json_object['logo']
+        if 'stream_type' in json_object:
+            stream_info['stream_type'] = json_object['stream_type']
+        if 'viewers' in json_object:
+            stream_info['viewers'] = json_object['viewers']
         return stream_info
 
     def get_team_streams_by_name(self, name):

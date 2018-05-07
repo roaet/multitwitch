@@ -7,8 +7,8 @@ $(document).ready( function() {
 	var $featured_container = 0;
 	var $followed_container = 0;
 	var default_live_filter = "*";
-	var default_tag_filter = ".tag-community";
-	var default_sort = "random";
+	var default_tag_filter = ".tag-default";
+	var default_sort = 'viewers';
 	var num_streams = 0; //ugh, couldn't quite get rid of this
 	var layout_timer = false;
 
@@ -239,12 +239,14 @@ $(document).ready( function() {
 					name: '.channelname',
 					live: function( itemElem ) {
 						return $(itemElem).hasClass('live');
-					}
+					},
+                    viewers: '.viewers parseInt'
 				},
 				sortBy: default_sort,
 				sortAscending: {
 					name: true,
 					live: false,
+                    viewers: false,
 				},
 				layoutMode: 'masonry',
 				masonry: {
@@ -347,7 +349,7 @@ $(document).ready( function() {
 		if(!live_filter) live_filter = "*";
 		var tag_filter = $('#tag-filters button.selected').attr('data-filter-value');
 		var sort_filter = $('#sort-filters button.selected').attr('data-sort-value');
-		if(!sort_filter) sort_filter = ['live','random'];
+		if(!sort_filter) sort_filter = ['viewers', 'live','random'];
 		if(tag_filter == "*")
 			var cfilter = live_filter;
 		else
