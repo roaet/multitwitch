@@ -7,6 +7,9 @@ README = open(os.path.join(here, 'README.md')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
 
 requires = [
+    'requests',
+    'configparser',
+    'pastedeploy',
     'pyramid',
     'SQLAlchemy',
     'transaction',
@@ -14,6 +17,8 @@ requires = [
     'pyramid_debugtoolbar',
     'zope.sqlalchemy',
     'waitress',
+    'simplejson',
+    'jinja2',
     ]
 
 setup(name='multitwitch',
