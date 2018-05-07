@@ -5,6 +5,7 @@ import json
 from multitwitch.lib.session import web, ajax
 from pyramid.response import FileResponse
 
+import multitwitch.lib.communitylist as CL
 import multitwitch.lib.twitch as T
 import multitwitch.lib.streamlister as sl
 
@@ -15,21 +16,19 @@ class WebView:
         config = configparser.ConfigParser()
         config.read('config.ini')
         default = config['DEFAULT']
-        community_name = default.get('community_name', 'x3lgaming')
+        comlist = CL.CommunityList(config)
+        community_dict = comlist.get_communities()
         title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://rtmp.roaet.com:5000')
+        base_url = default.get('base_url', 'http://x3l.tv')
 
         streamlister = sl.StreamLister(config)
-        community_streams = streamlister.get_community_streams_by_name(
-            community_name)
-
         stream_team = 'x3lelite'
-        stream_team_streams = streamlister.get_team_streams_by_name(steam_team)
+        stream_team_streams = streamlister.get_team_streams_by_name(
+            stream_team)
         staff_picks = streamlister.get_staff_picks()
         return {'project' : title,
                 'streams' : [],
-                'community_streams': community_streams,
-                'community_name': community_name,
+                'communities': community_dict,
                 'stream_team_streams': stream_team_streams,
                 'staff_picks': staff_picks,
                 'base_url' : base_url,
@@ -41,15 +40,15 @@ class WebView:
         config = configparser.ConfigParser()
         config.read('config.ini')
         default = config['DEFAULT']
-        community_name = default.get('community_name', 'x3lgaming')
+        comlist = CL.CommunityList(config)
+        community_dict = comlist.get_communities()
         title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://rtmp.roaet.com:5000')
+        base_url = default.get('base_url', 'http://x3l.tv')
 
         streamlister = sl.StreamLister(config)
-        community_streams = streamlister.get_community_streams_by_name(
-            community_name)
         stream_team = 'x3lelite'
-        stream_team_streams = streamlister.get_team_streams_by_name(steam_team)
+        stream_team_streams = streamlister.get_team_streams_by_name(
+            stream_team)
         staff_picks = streamlister.get_staff_picks()
 
         path = request.path
@@ -65,8 +64,7 @@ class WebView:
         edit_string = '/'.join(stream_list)
         return {'project' : title,
                 'streams' : stream_list,
-                'community_streams': community_streams,
-                'community_name': community_name,
+                'communities': community_dict,
                 'stream_team_streams': stream_team_streams,
                 'staff_picks': staff_picks,
                 'base_url' : base_url,
@@ -95,9 +93,8 @@ class WebView:
         config = configparser.ConfigParser()
         config.read('config.ini')
         default = config['DEFAULT']
-        community_name = default.get('community_name', 'x3lgaming')
         title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://rtmp.roaet.com:5000')
+        base_url = default.get('base_url', 'http://x3l.tv')
 
         path = request.path
         if path.startswith('/'):
@@ -125,13 +122,10 @@ class WebView:
         config = configparser.ConfigParser()
         config.read('config.ini')
         default = config['DEFAULT']
-        community_name = default.get('community_name', 'x3lgaming')
         title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://rtmp.roaet.com:5000')
+        base_url = default.get('base_url', 'http://x3l.tv')
 
         streamlister = sl.StreamLister(config)
-        stream_list = streamlister.get_community_streams_by_name(
-            community_name)
         team_list = streamlister.get_team_streams_by_name('x3lelite')
         return "PASS"
 
