@@ -40,6 +40,24 @@ class Twitch(object):
         community_json = self._make_json_request('communities', payload)
         return community_json
 
+    def get_stream_info_by_name(self, name):
+        payload = {'login': name}
+        user_json = self._make_json_request('users', payload)
+        final_user_json = None
+        if len(user_json['users']) == 0:
+            return None
+        if len(user_json['users']) > 1:
+            for users in user_json['users']:
+                if user['display_name'] == name:
+                    final_user_json = user
+        else:
+            final_user_json = user_json['users'][0]
+
+        target = 'streams/%s' % final_user_json['_id']
+        stream_json = self._make_json_request(target)
+        stream_info = stream_json['stream']
+        return stream_info
+
     def get_team_info_by_name(self, name):
         target = 'teams/%s' % name
         team_json = self._make_json_request(target)

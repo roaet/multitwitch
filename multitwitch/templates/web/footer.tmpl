@@ -10,6 +10,12 @@
             <li><a href="//facebook.com/X3LGaming" target="_blank">Facebook</a> &nbsp; </li>
             <li><a href="//reddit.com/r/X3LGaming/" target="_blank">Reddit</a> &nbsp; </li>
             <li><a href="//amzn.to/2JPASr5" target="_blank">Merch</a> &nbsp; </li>
-            <li><a href="//twitch.tv/roaet" target="_blank">Developed by roaet</a> </li>
+            <li><a href="//twitch.tv/roaet" target="_blank">Developed by roaet
+                {%- if author_status -%}
+                    &nbsp;(<span style='color:#F00'>live</span>)
+                {%- else -%}
+                    <!-- (<span style='color:#777'>offline</span>) -->
+                {%- endif -%}
+            </a></li>
 		</ul>
         <!-- -->
