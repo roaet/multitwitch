@@ -50,22 +50,29 @@ class StreamLister(object):
             list_info.append(self._get_list_info_dict_for_team_users(stream))
         return list_info
 
+    def get_stream_by_name(self, name):
+        stream_json = self.twitch_api.get_stream_info_by_name(name)
+        return stream_json
+
+    def stream_is_online(self, name):
+        stream = self.get_stream_by_name(name)
+        return stream != None
+
     def get_community_streams_by_name(self, name):
         community_json = self.twitch_api.get_community_info_by_name(name)
         community_id = community_json.get('_id', None)
         if community_id is None:
             return []
-        streams_json = self.twitch_api.get_streams_by_community_id(
-            community_id)
+        streams = self.twitch_api.get_streams_by_community_id(community_id)
         list_info = [] 
-        for stream in streams_json['streams']:
+        for stream in streams:
             list_info.append(self._get_list_info_dict(stream))
         return list_info
 
     def get_staff_picks(self):
-        streams_json = self.twitch_api.followed_channels_for_clientid()
+        streams = self.twitch_api.followed_channels_for_clientid()
 
         list_info = [] 
-        for stream in streams_json['streams']:
+        for stream in streams:
             list_info.append(self._get_list_info_dict(stream))
         return list_info

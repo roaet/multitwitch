@@ -16,6 +16,7 @@ class WebView:
         config = configparser.ConfigParser()
         config.read('config.ini')
         default = config['DEFAULT']
+        author_name = default.get('author_name')
         comlist = CL.CommunityList(config)
         community_dict = comlist.get_communities()
         title = default.get('title', 'X3LGaming Multitwitch')
@@ -26,6 +27,7 @@ class WebView:
         stream_team_streams = streamlister.get_team_streams_by_name(
             stream_team)
         staff_picks = streamlister.get_staff_picks()
+        author_status = streamlister.stream_is_online(author_name)
         return {'project' : title,
                 'streams' : [],
                 'communities': community_dict,
@@ -33,13 +35,15 @@ class WebView:
                 'staff_picks': staff_picks,
                 'base_url' : base_url,
                 'unique_streams' : [],
-                'nstreams' : len([])}
+                'nstreams' : len([]),
+                'author_status': author_status}
 
     @web(template="web/home.tmpl")
     def edit(request):
         config = configparser.ConfigParser()
         config.read('config.ini')
         default = config['DEFAULT']
+        author_name = default.get('author_name')
         comlist = CL.CommunityList(config)
         community_dict = comlist.get_communities()
         title = default.get('title', 'X3LGaming Multitwitch')
@@ -62,6 +66,7 @@ class WebView:
         stream_list = path_parts
         stream_list.pop(0) # removes 'edit'
         edit_string = '/'.join(stream_list)
+        author_status = streamlister.stream_is_online(author_name)
         return {'project' : title,
                 'streams' : stream_list,
                 'communities': community_dict,
@@ -70,7 +75,8 @@ class WebView:
                 'base_url' : base_url,
                 'unique_streams' : [],
                 'edit_string': edit_string,
-                'nstreams' : len(stream_list)}
+                'nstreams' : len(stream_list),
+                'author_status': author_status}
 
     @web()
     def view(request):
