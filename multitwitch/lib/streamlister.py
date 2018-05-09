@@ -63,17 +63,16 @@ class StreamLister(object):
         community_id = community_json.get('_id', None)
         if community_id is None:
             return []
-        streams_json = self.twitch_api.get_streams_by_community_id(
-            community_id)
+        streams = self.twitch_api.get_streams_by_community_id(community_id)
         list_info = [] 
-        for stream in streams_json['streams']:
+        for stream in streams:
             list_info.append(self._get_list_info_dict(stream))
         return list_info
 
     def get_staff_picks(self):
-        streams_json = self.twitch_api.followed_channels_for_clientid()
+        streams = self.twitch_api.followed_channels_for_clientid()
 
         list_info = [] 
-        for stream in streams_json['streams']:
+        for stream in streams:
             list_info.append(self._get_list_info_dict(stream))
         return list_info

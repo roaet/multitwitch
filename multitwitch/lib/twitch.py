@@ -22,17 +22,18 @@ class Twitch(object):
         }
         return headers
 
-    def _make_request(self, endpoint, payload=None, limit=25):
+    def _make_request(self, endpoint, payload=None, limit=25, offset=0):
         if payload and limit:
             payload['limit'] = limit
+            payload['offset'] = offset
         r = requests.get(
             self._build_endpoint(endpoint),
             params=payload, headers=self._basic_headers()
         )
         return r
 
-    def _make_json_request(self, endpoint, payload=None, limit=25):
-        r = self._make_request(endpoint, payload, limit)
+    def _make_json_request(self, endpoint, payload=None, limit=25, offset=0):
+        r = self._make_request(endpoint, payload, limit, offset)
         return r.json()
 
     def get_community_info_by_name(self, name):
@@ -65,8 +66,24 @@ class Twitch(object):
 
     def get_streams_by_community_id(self, id):
         payload = {'community_id': id}
-        streams_json = self._make_json_request('streams', payload, limit=100)
-        return streams_json
+        limit = 100
+        offset = 0
+        streams = []
+
+        streams_json = self._make_json_request(
+            'streams', payload, limit=limit)
+        streams.extend(streams_json['streams'])
+        if streams_json and streams_json['_total'] > limit:
+            while(
+                streams_json and
+                streams_json['_total'] > 0 and
+                len(streams_json['streams']) > 0
+            ):
+                offset += limit
+                streams_json = self._make_json_request(
+                    'streams', payload, limit=limit, offset=offset)
+                streams.extend(streams_json['streams'])
+        return streams
 
     def followed_channels_for_clientid(self, clientid=None, oauth=None):
         if (clientid is None or oauth is None) and 'twitch' in self.config:
@@ -84,5 +101,4 @@ class Twitch(object):
             path,
             headers=headers
         )
-        return r.json()
-        
+        return r.json()['streams']
