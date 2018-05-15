@@ -1,5 +1,7 @@
 *.pyc
 multitwitch.egg-info
 config.ini
+production.ini
+development.ini
 
 .venv/

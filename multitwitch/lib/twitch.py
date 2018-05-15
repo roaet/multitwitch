@@ -1,6 +1,7 @@
 import configparser
 import json
 import requests
+import time
 
 
 class Twitch(object):
@@ -83,6 +84,7 @@ class Twitch(object):
                 streams_json = self._make_json_request(
                     'streams', payload, limit=limit, offset=offset)
                 streams.extend(streams_json['streams'])
+                time.sleep(2)
         return streams
 
     def followed_channels_for_clientid(self, clientid=None, oauth=None):
