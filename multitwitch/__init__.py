@@ -23,15 +23,12 @@ def db(request):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    print(settings)
-    print(global_config)
     config = Configurator(settings=settings)
     config.scan('multitwitch.models')
     engine = engine_from_config(settings, prefix='sqlalchemy.')
     initialize_sql(engine)
     config.registry.dbmaker = sessionmaker(bind=engine)
-    config.add_request_method(db,reify=True)
-
+    config.add_request_method(db, reify=True)
     config.include(routes)
-    return config.make_wsgi_app()
 
+    return config.make_wsgi_app()
