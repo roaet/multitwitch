@@ -22,7 +22,9 @@ class WebView:
         title = default.get('title', 'X3LGaming Multitwitch')
         base_url = default.get('base_url', 'http://x3l.tv')
 
-        # streamlister = sl.StreamLister(config)
+        streamlister = sl.StreamLister(config)
+        author_status = streamlister.stream_is_online(author_name)
+
         # stream_team = 'x3lelite'
         # stream_team_streams = streamlister.get_team_streams_by_name(
         #     stream_team)
@@ -45,7 +47,7 @@ class WebView:
         config.read('config.ini')
         default = config['DEFAULT']
         author_name = default.get('author_name')
-        comlist = CL.CommunityList(config)
+        comlist = CL.CommunityList(config, session=request.db)
         community_dict = comlist.get_communities()
         title = default.get('title', 'X3LGaming Multitwitch')
         base_url = default.get('base_url', 'http://x3l.tv')

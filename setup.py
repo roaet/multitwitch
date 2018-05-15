@@ -19,6 +19,7 @@ requires = [
     'waitress',
     'simplejson',
     'jinja2',
+    'mysql-python',
     ]
 
 setup(name='multitwitch',
