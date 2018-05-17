@@ -4,9 +4,10 @@ import multitwitch.lib.twitch as T
 
 
 class StreamLister(object):
-    def __init__(self, conf):
-        self.twitch_api = T.Twitch(conf)
-        self.conf = conf
+    def __init__(self, request):
+        self.twitch_api = T.Twitch(request)
+        self.conf = request.registry.settings
+        self.request = request
 
     def _get_list_info_dict_for_team_users(self, json_object):
         stream_info = {}

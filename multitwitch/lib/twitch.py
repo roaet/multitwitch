@@ -1,17 +1,15 @@
-import configparser
 import json
 import requests
 import time
 
 
 class Twitch(object):
-    def __init__(self, conf):
-        self.config = conf
+    def __init__(self, request):
+        self.config = request.registry.settings
 
         self.endpoint = 'https://api.twitch.tv/kraken'
-        if 'twitch' in self.config:
-            self.clientid = self.config['twitch'].get('unauthclient_id')
-            self.endpoint = self.config['twitch'].get('apiurl', self.endpoint)
+        self.clientid = self.config.get('twitch.unauthclient_id')
+        self.endpoint = self.config.get('twitch.apiurl', self.endpoint)
 
     def _build_endpoint(self, target):
         return '/'.join([self.endpoint, target])
@@ -27,14 +25,20 @@ class Twitch(object):
         if payload and limit:
             payload['limit'] = limit
             payload['offset'] = offset
-        r = requests.get(
-            self._build_endpoint(endpoint),
-            params=payload, headers=self._basic_headers()
-        )
+        try:
+            r = requests.get(
+                self._build_endpoint(endpoint),
+                params=payload, headers=self._basic_headers()
+            )
+        except requests.exceptions.ChunkedEncodingError as e:
+            print("Caught error %s" % e)
+            return None
         return r
 
     def _make_json_request(self, endpoint, payload=None, limit=25, offset=0):
         r = self._make_request(endpoint, payload, limit, offset)
+        if r is None:
+            return None
         return r.json()
 
     def get_community_info_by_name(self, name):
@@ -83,18 +87,20 @@ class Twitch(object):
                 offset += limit
                 streams_json = self._make_json_request(
                     'streams', payload, limit=limit, offset=offset)
+                if streams_json is None:
+                    return []
                 streams.extend(streams_json['streams'])
                 time.sleep(2)
         return streams
 
     def followed_channels_for_clientid(self, clientid=None, oauth=None):
         if (clientid is None or oauth is None) and 'twitch' in self.config:
-            clientid = self.config['twitch'].get('authclient_id')
-            oauth = self.config['twitch'].get('authclient_oath')
+            clientid = self.config.get('twitch.authclient_id')
+            oauth = self.config.get('twitch.authclient_oath')
 
         path = 'https://api.twitch.tv/kraken/streams/followed'
         if 'twitch' in self.config:
-            path = self.config['twitch'].get('follow_apiurl', path)
+            path = self.config.get('twitch.follow_apiurl', path)
         headers = {
             'Client-ID': clientid,
             'Authorization': 'OAuth %s' % oauth
