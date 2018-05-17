@@ -2,29 +2,29 @@ from datetime import datetime
 from datetime import timedelta
 import operator
 
+from sqlalchemy import and_
+from sqlalchemy import or_
+
 import multitwitch.lib.streamlister as sl
 from multitwitch.models.twitch_db import Community
 from multitwitch.models.twitch_db import Stream
 
 
 class CommunityList(object):
-    def __init__(self, config, community=False, session=None):
-        self.conf = config
-        self.session = session
+    def __init__(self, request, community=False, session=None):
+        self.request = request
+        self.conf = request.registry.settings
+        self.session = request.db
 
-        self.default_community = self.conf[
-            'DEFAULT'].get('default_community', '')
-
-        if session is None:
-            self._parse_config_list()
-        else:
-            self._configure_from_db()
+        self.default_community = self.conf.get('site.default_community', '')
+        self._configure_from_db()
 
     def _configure_from_db(self):
         if self.session is None:
             return
         conf_dict = {}
-        for com in self.session.query(Community).all():
+        for com in self.session.query(Community).filter(
+                Community.active == 1).all():
             conf_dict[com.twitch_name] = com.display_name
         self.community_dict = conf_dict
 
@@ -42,8 +42,9 @@ class CommunityList(object):
     def get_community_streams_db(self, twitch_name):
         if self.session is None:
             return {}
-        com = self.session.query(Community).filter(
-            Community.twitch_name == twitch_name).one()
+        com = self.session.query(Community).filter(and_(
+            Community.twitch_name == twitch_name,
+            Community.active == 1)).one()
         streams = com.streams
         community_streams = []
         for stream in streams:
@@ -57,9 +58,11 @@ class CommunityList(object):
     def get_community(self, twitch_name, web_name=None, db=True):
         if self.session is not None and db:
             return self.get_community_streams_db(twitch_name)
+        if self.session is not None:
+            self._configure_from_db()
         if web_name is None:
             web_name = self.community_dict[twitch_name]
-        streamlister = sl.StreamLister(self.conf)
+        streamlister = sl.StreamLister(self.request)
         community_streams = streamlister.get_community_streams_by_name(
             twitch_name)
         community_streams = sorted(
@@ -78,8 +81,11 @@ class CommunityList(object):
             return None
         current_time = datetime.utcnow()
         min_sec_ago = current_time - timedelta(seconds=min_age_sec)
-        community = self.session.query(Community).filter(
-            Community.last_update < min_sec_ago).order_by(
+        community = self.session.query(Community).filter(and_(
+            Community.active == 1, or_(
+            Community.last_update < min_sec_ago,
+            Community.last_update == None
+            ))).order_by(
             Community.last_update.asc()).first()
         return community
 
@@ -103,8 +109,9 @@ class CommunityList(object):
     def populate_community_streams(self, community, commit=False):
         if self.session is None:
             return None
-        com = self.session.query(Community).filter(
-            Community.twitch_name == community).one()
+        com = self.session.query(Community).filter(and_(
+            Community.twitch_name == community,
+            Community.active == 1)).one()
         community_dict = self.get_community(com.twitch_name, db=False)
         streams = community_dict['streams']
         name_check = {}
@@ -134,6 +141,7 @@ class CommunityList(object):
 
     def get_community_list(self):
         conf_dict = {}
+        print(self.community_dict)
         for twitch_name, web_name in self.community_dict.items():
             conf_dict[twitch_name] = self.get_community(twitch_name, web_name)
         return conf_dict

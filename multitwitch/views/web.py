@@ -13,16 +13,14 @@ class WebView:
 
     @web(template="web/home.tmpl")
     def home(request):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        default = config['DEFAULT']
-        author_name = default.get('author_name')
-        comlist = CL.CommunityList(config, session=request.db)
+        config = request.registry.settings
+        author_name = config.get('site.author_name')
+        title = config.get('site.title', 'X3LGaming Multitwitch')
+        base_url = config.get('site.base_url', 'http://x3l.tv')
+        comlist = CL.CommunityList(request)
         community_dict = comlist.get_communities()
-        title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://x3l.tv')
 
-        streamlister = sl.StreamLister(config)
+        streamlister = sl.StreamLister(request)
         author_status = streamlister.stream_is_online(author_name)
 
         # stream_team = 'x3lelite'
@@ -43,21 +41,20 @@ class WebView:
 
     @web(template="web/home.tmpl")
     def edit(request):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        default = config['DEFAULT']
-        author_name = default.get('author_name')
-        comlist = CL.CommunityList(config, session=request.db)
+        config = request.registry.settings
+        author_name = config.get('site.author_name')
+        title = config.get('site.title', 'X3LGaming Multitwitch')
+        base_url = config.get('site.base_url', 'http://x3l.tv')
+        comlist = CL.CommunityList(request)
         community_dict = comlist.get_communities()
-        title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://x3l.tv')
 
-        streamlister = sl.StreamLister(config)
-        stream_team = 'x3lelite'
-        stream_team_streams = streamlister.get_team_streams_by_name(
-            stream_team)
-        staff_picks = streamlister.get_staff_picks()
+        streamlister = sl.StreamLister(request)
+        author_status = streamlister.stream_is_online(author_name)
 
+        # stream_team = 'x3lelite'
+        # stream_team_streams = streamlister.get_team_streams_by_name(
+        #     stream_team)
+        # staff_picks = streamlister.get_staff_picks()
         path = request.path
         if path.startswith('/'): # removes front slash /edit/ -> edit/
             path = path[1:]
@@ -69,7 +66,7 @@ class WebView:
         stream_list = path_parts
         stream_list.pop(0) # removes 'edit'
         edit_string = '/'.join(stream_list)
-        author_status = streamlister.stream_is_online(author_name)
+
         return {'project' : title,
                 'streams' : stream_list,
                 'communities': community_dict,
@@ -99,11 +96,12 @@ class WebView:
 
     @web(template="web/streams.tmpl")
     def streams(request):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        default = config['DEFAULT']
-        title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://x3l.tv')
+        config = request.registry.settings
+        author_name = config.get('site.author_name')
+        title = config.get('site.title', 'X3LGaming Multitwitch')
+        base_url = config.get('site.base_url', 'http://x3l.tv')
+        comlist = CL.CommunityList(request)
+        community_dict = comlist.get_communities()
 
         path = request.path
         if path.startswith('/'):
@@ -125,18 +123,6 @@ class WebView:
                 'unique_streams' : [],
                 'edit_string': edit_string,
                 'nstreams' : len(stream_list)}
-
-    @web()
-    def twitch_api_test(request):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        default = config['DEFAULT']
-        title = default.get('title', 'X3LGaming Multitwitch')
-        base_url = default.get('base_url', 'http://x3l.tv')
-
-        streamlister = sl.StreamLister(config)
-        team_list = streamlister.get_team_streams_by_name('x3lelite')
-        return "PASS"
 
     @staticmethod
     def favicon(request):

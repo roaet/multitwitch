@@ -6,9 +6,6 @@ def routes(config):
     config.add_route('favicon', '/favicon.ico')
     config.add_view(WebView.favicon, route_name='favicon')
 
-    config.add_route('twitch_api_test', '/twitch_api_test')
-    config.add_view(WebView.twitch_api_test, route_name='twitch_api_test')
-
     config.add_route('view', '/view')
     config.add_view(WebView.view, route_name='view')
 
