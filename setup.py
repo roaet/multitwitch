@@ -45,7 +45,7 @@ setup(name='multitwitch',
       [paste.app_factory]
       main = multitwitch:main
       [console_scripts]
-      initialize_multitwitch_db = multitwitch.scripts.initializedb:main
+      cache_process = multitwitch.scripts.cache_process:main
       """,
       )
 
